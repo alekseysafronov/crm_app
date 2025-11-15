@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from database import init_db, get_db_connection
 import re
 
@@ -121,6 +121,23 @@ def edit_client(client_id):
         return redirect(url_for('clients'))
     
     return render_template('edit_client.html', client=client)
+
+@app.route('/phone_clicked/<int:client_id>', methods=['POST'])
+def phone_clicked(client_id):
+    """Обработка клика по номеру телефона"""
+    conn = get_db_connection()
+    
+    # Обновляем статус на "В работе"
+    conn.execute('''
+        UPDATE clients 
+        SET status = 'В работе', updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    ''', (client_id,))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'new_status': 'В работе'})
 
 @app.route('/delete_client/<int:client_id>')
 def delete_client(client_id):

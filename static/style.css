@@ -19,3 +19,27 @@
 .table-responsive {
     border-radius: 0.375rem;
 }
+
+/* Стили для телефонных ссылок */
+.phone-link {
+    text-decoration: none;
+    color: #0d6efd;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.phone-link:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+/* Анимация для обновления статуса */
+.status-updated {
+    animation: statusFlash 1s ease-in-out;
+}
+
+@keyframes statusFlash {
+    0% { background-color: transparent; }
+    50% { background-color: #fff3cd; }
+    100% { background-color: transparent; }
+}

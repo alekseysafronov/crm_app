@@ -49,9 +49,16 @@
                 </thead>
                 <tbody>
                     {% for client in clients %}
-                    <tr>
+                    <tr id="client-{{ client.id }}">
                         <td>{{ client.id }}</td>
-                        <td>+{{ client.phone }}</td>
+                        <td>
+                            <a href="tel:+{{ client.phone }}" 
+                               class="phone-link" 
+                               data-client-id="{{ client.id }}"
+                               onclick="handlePhoneClick({{ client.id }})">
+                                +{{ client.phone }}
+                            </a>
+                        </td>
                         <td>{{ client.name or '-' }}</td>
                         <td>{{ client.services or '-' }}</td>
                         <td>{{ client.deadline or '-' }}</td>
@@ -62,7 +69,7 @@
                                 -
                             {% endif %}
                         </td>
-                        <td>
+                        <td id="status-{{ client.id }}">
                             <span class="badge 
                                 {% if client.status == 'Новый' %}bg-primary
                                 {% elif client.status == 'В работе' %}bg-warning
@@ -92,4 +99,90 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function handlePhoneClick(clientId) {
+    // Отправляем AJAX запрос для обновления статуса
+    fetch(`/phone_clicked/${clientId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Обновляем статус на странице без перезагрузки
+            updateClientStatus(clientId, data.new_status);
+            
+            // Показываем уведомление
+            showNotification('Статус изменен на "В работе"', 'success');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Ошибка при обновлении статуса', 'error');
+    });
+}
+
+function updateClientStatus(clientId, newStatus) {
+    const statusElement = document.getElementById(`status-${clientId}`);
+    if (statusElement) {
+        // Обновляем текст статуса
+        const badge = statusElement.querySelector('.badge');
+        badge.textContent = newStatus;
+        
+        // Обновляем классы для цвета
+        badge.className = 'badge ' + getStatusBadgeClass(newStatus);
+    }
+}
+
+function getStatusBadgeClass(status) {
+    switch(status) {
+        case 'Новый': return 'bg-primary';
+        case 'В работе': return 'bg-warning';
+        case 'Сделка заключена': return 'bg-success';
+        case 'Завершен': return 'bg-success';
+        case 'Отказ': return 'bg-danger';
+        default: return 'bg-secondary';
+    }
+}
+
+function showNotification(message, type) {
+    // Создаем элемент уведомления
+    const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show`;
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Добавляем уведомление в начало контейнера
+    const container = document.querySelector('.container');
+    container.insertBefore(notification, container.firstChild);
+    
+    // Автоматически скрываем через 3 секунды
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+// Обработка кликов для всех телефонных ссылок
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneLinks = document.querySelectorAll('.phone-link');
+    phoneLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Даем время на отправку AJAX запроса перед переходом по tel:
+            setTimeout(() => {
+                // Позволяем браузеру обработать tel: ссылку
+            }, 100);
+        });
+    });
+});
+</script>
 {% endblock %}
