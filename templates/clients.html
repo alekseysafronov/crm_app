@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Клиенты</h2>
+    <a href="{{ url_for('upload_phones') }}" class="btn btn-primary">Добавить номера</a>
+</div>
+
+<!-- Статистика по статусам -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Статистика по статусам</h5>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('clients') }}" 
+                       class="btn btn-sm {{ 'btn-primary' if not current_status else 'btn-outline-primary' }}">
+                        Все ({{ status_stats|sum(attribute='count') }})
+                    </a>
+                    {% for stat in status_stats %}
+                    <a href="{{ url_for('clients', status=stat.status) }}" 
+                       class="btn btn-sm {{ 'btn-primary' if current_status == stat.status else 'btn-outline-primary' }}">
+                        {{ stat.status }} ({{ stat.count }})
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица клиентов -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Телефон</th>
+                        <th>Имя</th>
+                        <th>Услуги</th>
+                        <th>Сроки</th>
+                        <th>Бюджет</th>
+                        <th>Статус</th>
+                        <th>Дата создания</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                    <tr>
+                        <td>{{ client.id }}</td>
+                        <td>+{{ client.phone }}</td>
+                        <td>{{ client.name or '-' }}</td>
+                        <td>{{ client.services or '-' }}</td>
+                        <td>{{ client.deadline or '-' }}</td>
+                        <td>
+                            {% if client.budget %}
+                                {{ "{:,}".format(client.budget).replace(",", " ") }} ₽
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if client.status == 'Новый' %}bg-primary
+                                {% elif client.status == 'В работе' %}bg-warning
+                                {% elif client.status == 'Сделка заключена' %}bg-success
+                                {% elif client.status == 'Завершен' %}bg-success
+                                {% elif client.status == 'Отказ' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ client.status }}
+                            </span>
+                        </td>
+                        <td>{{ client.created_at[:10] }}</td>
+                        <td>
+                            <a href="{{ url_for('edit_client', client_id=client.id) }}" 
+                               class="btn btn-sm btn-outline-primary">Редактировать</a>
+                            <a href="{{ url_for('delete_client', client_id=client.id) }}" 
+                               class="btn btn-sm btn-outline-danger" 
+                               onclick="return confirm('Удалить клиента?')">Удалить</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center">Клиенты не найдены</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
