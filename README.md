@@ -8,17 +8,24 @@ Mini CRM for calling
 bash
 ```
 python -m venv venv
-source venv/bin/activate  # Linux/Mac```
+source venv/bin/activate  # Linux/Mac
+```
 # или
-```venv\Scripts\activate  # Windows```
+```
+venv\Scripts\activate  # Windows
+```
 Установите зависимости:
 
 bash
-```pip install flask```
+```
+pip install flask
+```
 Запустите приложение:
 
 bash
-```python app.py```
+```
+python app.py
+```
 Основные функции
 Загрузка номеров: Массовая загрузка телефонов списком
 
