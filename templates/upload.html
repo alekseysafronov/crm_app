@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h2>Загрузка номеров телефонов</h2>
+        
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="phones" class="form-label">Номера телефонов (каждый с новой строки):</label>
+                        <textarea class="form-control" id="phones" name="phones" rows="15" 
+                                  placeholder="79790251285&#10;79673577275&#10;79064989105" required></textarea>
+                        <div class="form-text">
+                            Формат: 11 цифр, начинаются с 7 или 8. Пример: 79790251285
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Загрузить номера</button>
+                    <a href="{{ url_for('clients') }}" class="btn btn-secondary">Назад к клиентам</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
